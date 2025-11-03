@@ -137,6 +137,21 @@ Built by **INTI International University Students**
 
 ---
 
+### 1️⃣ Prerequisites
+- Install **[XAMPP](https://www.apachefriends.org/index.html)**  
+- Make sure **Apache** and **MySQL** are running.
+
+## 🚀 How to Run
+
+1. **Clone or download** this repository.  
+2. Move the folder to your **htdocs** directory (if using XAMPP).  
+3. Import the `graceful_gathering.sql` file into **phpMyAdmin**.  
+4. Start **Apache** and **MySQL** from the XAMPP Control Panel.  
+5. Visit:  
+   👉 [http://localhost/Graceful-Gathering](http://localhost/Graceful-Gathering)
+
+---
+
 <p align="center">
   <em>“Graceful Gathering — a platform to make wedding planning simple and elegant.”</em>
 </p>
