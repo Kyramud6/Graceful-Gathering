@@ -1,5 +1,5 @@
 # Graceful-Gathering
-![logo](https://github.com/user-attachments/assets/d5592bbc-8281-4ac5-a0bb-a10aaf44f280)
+<img width="722" height="255" alt="logo" src="https://github.com/user-attachments/assets/3e204a85-acf7-4a00-9337-f39c98cddeb1"/>
 A PHP-based e-commerce platform for wedding services.  
 Includes user-side browsing, cart, and order system.
 
