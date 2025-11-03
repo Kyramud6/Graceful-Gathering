@@ -14,3 +14,4 @@ Includes user-side browsing, cart, and order system.
 
 ## 🧠 My Role
 Developed the **user site** (front-end and logic integration).
+
