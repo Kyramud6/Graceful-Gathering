@@ -62,6 +62,7 @@ Homepage and below is the recommendation product that is depend by the star rati
 
 <img width="810" height="394" alt="image" src="https://github.com/user-attachments/assets/c0588d6d-f1f9-4005-beca-e4b7c3c597e6" />
 This is where the customer can go through shopping
+
 <img width="792" height="336" alt="image" src="https://github.com/user-attachments/assets/12c74fc5-7005-4c00-83df-22f405b767dd" />
 Booking services with timeslot they can choose
 
