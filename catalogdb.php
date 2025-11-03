@@ -66,7 +66,11 @@ function getProducts($filters = array())
     // Add ordering
     $sql .= " ORDER BY name ASC";
 
-
+    // Add LIMIT and OFFSET if offset is provided
+    if (isset($filters['offset'])) {
+        $sql .= " LIMIT 12 OFFSET :offset"; // Show 12 products per page
+        $params[':offset'] = intval($filters['offset']);
+    }
 
     try {
         // Prepare and execute the query
@@ -149,6 +153,7 @@ function getCategories()
 }
 
 // Function to add product to cart
+
 function addToCart($product_id, $user_id, $quantity = 1)
 {
     if (!isset($_SESSION['user_id'])) {
@@ -162,22 +167,28 @@ function addToCart($product_id, $user_id, $quantity = 1)
         $stmt = $conn->prepare("SELECT stock_quantity FROM products WHERE product_id = :product_id");
         $stmt->execute([':product_id' => $product_id]);
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if (!$product) {
             $_SESSION['error_message'] = "Product not found.";
             return false;
         }
+
         $available_stock = $product['stock_quantity'];
+
         // Debugging: Check stock and requested quantity
         error_log("Stock quantity for product $product_id: $available_stock");
         error_log("Requested quantity: $quantity");
+
         if ($available_stock < $quantity) {
             $_SESSION['error_message'] = "The product is out of stock or the requested quantity exceeds available stock.";
             return false;
         }
+
         // Check if cart exists for user
         $stmt = $conn->prepare("SELECT id FROM cart WHERE user_id = :user_id");
         $stmt->execute([':user_id' => $user_id]);
         $cart = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if (!$cart) {
             // Create a new cart for the user
             $stmt = $conn->prepare("INSERT INTO cart (user_id) VALUES (:user_id)");
@@ -186,6 +197,7 @@ function addToCart($product_id, $user_id, $quantity = 1)
         } else {
             $cart_id = $cart['id'];
         }
+
         // Check if the product already exists in the cart
         $stmt = $conn->prepare("SELECT quantity FROM cart_items WHERE cart_id = :cart_id AND product_id = :product_id");
         $stmt->execute([
@@ -193,6 +205,7 @@ function addToCart($product_id, $user_id, $quantity = 1)
             ':product_id' => $product_id
         ]);
         $cart_item = $stmt->fetch(PDO::FETCH_ASSOC);
+
         if ($cart_item) {
             // Check if the new total quantity exceeds available stock
             $new_quantity = $cart_item['quantity'] + $quantity;
@@ -200,6 +213,7 @@ function addToCart($product_id, $user_id, $quantity = 1)
                 $_SESSION['error_message'] = "The total requested quantity exceeds available stock.";
                 return false;
             }
+
             // Update the quantity of the product in the cart
             $stmt = $conn->prepare("UPDATE cart_items SET quantity = :quantity 
                                   WHERE cart_id = :cart_id AND product_id = :product_id");
@@ -390,3 +404,23 @@ function getMostViewedProducts($limit = 5)
 }
 
 
+
+
+// Function to update booking status
+function updateBookingStatus($booking_id, $status, $user_id)
+{
+    $conn = getDBConnection();
+
+    try {
+        $stmt = $conn->prepare("UPDATE bookings SET status = :status 
+                               WHERE id = :id AND user_id = :user_id");
+        $stmt->execute([
+            ':status' => $status,
+            ':id' => $booking_id,
+            ':user_id' => $user_id
+        ]);
+        return true;
+    } catch (PDOException $e) {
+        die("Status update failed: " . $e->getMessage());
+    }
+}

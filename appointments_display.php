@@ -3,7 +3,7 @@ session_start();
 include 'db_connection.php';
 
 $user_id = $_SESSION['user_id'];
-// fetch the details of appointment and display
+
 $query = "
     SELECT 
         a.appointment_date, 
@@ -44,7 +44,6 @@ $appointments = $stmt->get_result();
             </tr>
         </thead>
         <tbody>
-            <!--Only appear when have the appointment-->
             <?php while ($row = $appointments->fetch_assoc()): ?>
                 <tr>
                     <td><?php echo htmlspecialchars($row['product_name']); ?></td>

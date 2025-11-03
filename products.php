@@ -51,7 +51,7 @@ if (isset($_POST['add_product'])) {
             }
         }
     }
-    // Insert the details into products database
+
     $query = "INSERT INTO products (vendor_id, name, description, category, price, stock_quantity, image_url, status) 
               VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')";
     $stmt = $conn->prepare($query);

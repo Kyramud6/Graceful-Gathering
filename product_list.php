@@ -23,7 +23,7 @@ if (isset($_POST['edit_product'])) {
     
     // Check if a new image is uploaded
     if (!empty($_FILES['image_url']['name'])) {
-        $upload_dir = 'uploads/products/'; // This is path for upload the image and can be found based on the folder path
+        $upload_dir = 'uploads/products/'; // Make sure this directory exists and is writable
         
         // Create directory if it doesn't exist
         if (!is_dir($upload_dir)) {
@@ -215,7 +215,6 @@ function openEditForm(product) {
                 <?php foreach ($products as $product): ?>
                     <tr>
                         <td>
-                            <!--To display the product-->
                             <?php if (!empty($product['image_url'])): ?>
                                 <img src="<?php echo htmlspecialchars($product['image_url']); ?>" class="product-image" alt="Product Image">
                             <?php else: ?>

@@ -2,180 +2,92 @@
 require_once 'catalogdb.php';
 require_once 'db_connection.php';
 
-class DatabaseConnection
-{
-    private $connection;
-
-    public function __construct()
-    {
-        $this->connection = getDBConnection();
-    }
-
-    public function executeQuery(string $query, array $params = []): array
-    {
-        $stmt = $this->connection->prepare($query);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    public function getConnection(): PDO
-    {
-        return $this->connection;
-    }
+// Check if user is logged in
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit();
 }
 
-class User
-{
-    private $id;
-    private $email;
+// Initialize variables
+$errors = [];
+$success_message = '';
+$appointment = null;
+$payment_success = isset($_GET['payment_success']) && $_GET['payment_success'] == 1;
 
-    public function __construct(int $id)
-    {
-        $this->id = $id;
+
+
+
+
+// Handle appointment payment processing
+if (isset($_GET['appointment_id'])) {
+    $appointment_id = filter_var($_GET['appointment_id'], FILTER_SANITIZE_NUMBER_INT);
+    $appointment = getAppointmentById($appointment_id);
+
+    // Verify appointment exists and belongs to user
+    if (!$appointment || $appointment['user_id'] != $_SESSION['user_id']) {
+        header('Location: appointments.php');
+        exit();
     }
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
-}
+    // Handle payment form submission
+    if (isset($_GET['appointment_id'])) {
+        $appointment_id = filter_var($_GET['appointment_id'], FILTER_SANITIZE_NUMBER_INT);
 
-class AppointmentManager
-{
-    private $db;
-    private $user;
-
-    public function __construct(DatabaseConnection $db, User $user)
-    {
-        $this->db = $db;
-        $this->user = $user;
-    }
-
-    public function getUserAppointments(): array
-    {
-        $query = "
-            SELECT 
-                a.appointment_id,
-                a.appointment_date,
-                a.status,
-                a.notes,
-                p.name AS product_name,
-                p.price,
-                v.business_name AS vendor_name,
-                COALESCE(bp.payment_date, '') as payment_date
-            FROM 
-                appointments a
-            LEFT JOIN 
-                products p ON a.product_id = p.product_id
-            LEFT JOIN 
-                vendors v ON a.vendor_id = v.vendor_id
-            LEFT JOIN 
-                booking_payments bp ON a.appointment_id = bp.appointment_id
-            WHERE 
-                a.user_id = :user_id
-            ORDER BY 
-                a.appointment_date DESC
-        ";
-
-        return $this->db->executeQuery($query, [':user_id' => $this->user->getId()]);
-    }
-
-    public function getAppointmentById(int $appointmentId): ?array
-    {
-        $conn = $this->db->getConnection();
+        // Verify appointment belongs to user before redirecting
+        $conn = getDBConnection();
         $stmt = $conn->prepare("
-            SELECT * 
-            FROM appointments 
-            WHERE appointment_id = :appointment_id AND user_id = :user_id
-        ");
-        $stmt->execute([
-            ':appointment_id' => $appointmentId,
-            ':user_id' => $this->user->getId()
-        ]);
-        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-    }
-}
+        SELECT user_id 
+        FROM appointments 
+        WHERE appointment_id = :appointment_id
+    ");
+        $stmt->execute([':appointment_id' => $appointment_id]);
+        $appointment = $stmt->fetch(PDO::FETCH_ASSOC);
 
-class AppointmentController
-{
-    private $appointmentManager;
-    private $user;
-    private $db;
-
-    public function __construct()
-    {
-        // Check if user is logged in
-        if (!isset($_SESSION['user_id'])) {
-            header('Location: login.php');
+        if ($appointment && $appointment['user_id'] == $_SESSION['user_id']) {
+            header('Location: bookingpayment.php?appointment_id=' . $appointment_id);
+            exit();
+        } else {
+            header('Location: bookinghistory.php');
             exit();
         }
-
-        $this->db = new DatabaseConnection();
-        $this->user = new User($_SESSION['user_id']);
-        $this->appointmentManager = new AppointmentManager($this->db, $this->user);
-    }
-
-    public function handleRequest(): array
-    {
-        $errors = [];
-        $success_message = '';
-        $appointment = null;
-        $payment_success = isset($_GET['payment_success']) && $_GET['payment_success'] == 1;
-
-        // Handle appointment payment processing
-        if (isset($_GET['appointment_id'])) {
-            $appointment_id = filter_var($_GET['appointment_id'], FILTER_SANITIZE_NUMBER_INT);
-
-            try {
-                $appointment = $this->appointmentManager->getAppointmentById($appointment_id);
-
-                if (!$appointment) {
-                    header('Location: bookinghistory.php');
-                    exit();
-                }
-            } catch (Exception $e) {
-                $errors[] = "Error processing appointment: " . $e->getMessage();
-            }
-        }
-
-        // Fetch user's appointments
-        $appointments = $this->appointmentManager->getUserAppointments();
-
-        return [
-            'appointments' => $appointments,
-            'errors' => $errors,
-            'success_message' => $success_message,
-            'payment_success' => $payment_success,
-            'appointment' => $appointment
-        ];
     }
 }
 
-// Start session if not already started
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+// Fetch user's appointment history with enhanced details
+function getUserAppointments($user_id)
+{
+    $conn = getDBConnection();
+    $query = "
+        SELECT 
+            a.appointment_id,
+            a.appointment_date,
+            a.status,
+            a.notes,
+            p.name AS product_name,
+            p.price,
+            v.business_name AS vendor_name,
+            COALESCE(bp.payment_date, '') as payment_date
+        FROM 
+            appointments a
+        LEFT JOIN 
+            products p ON a.product_id = p.product_id
+        LEFT JOIN 
+            vendors v ON a.vendor_id = v.vendor_id
+        LEFT JOIN 
+            booking_payments bp ON a.appointment_id = bp.appointment_id
+        WHERE 
+            a.user_id = :user_id
+        ORDER BY 
+            a.appointment_date DESC
+    ";
+
+    $stmt = $conn->prepare($query);
+    $stmt->execute([':user_id' => $user_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Main execution
-try {
-    // Initialize controller and handle request
-    $controller = new AppointmentController();
-    $pageData = $controller->handleRequest();
-
-    // Extract page data
-    $appointments = $pageData['appointments'];
-    $errors = $pageData['errors'];
-    $success_message = $pageData['success_message'];
-    $payment_success = $pageData['payment_success'];
-    $appointment = $pageData['appointment'] ?? null;
-
-} catch (Exception $e) {
-    // Handle any unexpected errors
-    $errors[] = "An unexpected error occurred: " . $e->getMessage();
-    $appointment = null;
-}
+$appointments = getUserAppointments($_SESSION['user_id']);
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">

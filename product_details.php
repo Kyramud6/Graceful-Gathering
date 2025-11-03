@@ -169,7 +169,6 @@ if (isset($_POST['book_appointment'])) {
     </style>
 </head>
 <body>
-    <!--Product details form-->
     <h1><?php echo htmlspecialchars($product['name']); ?></h1>
 
     <div class="product-container">

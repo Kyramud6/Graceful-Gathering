@@ -57,8 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $total_price += ($_POST['delivery_method'] == 'delivery') ? 5.00 : 0;
 
             // Insert order with delivery method
-            $stmt = $conn->prepare("INSERT INTO orders (user_id, total_amount, order_date, status, 
-            delivery_method, pickup_location) VALUES (:user_id, :total, NOW(), 'pending', :delivery_method, :pickup_location)");
+            $stmt = $conn->prepare("INSERT INTO orders (user_id, total_amount, order_date, status, delivery_method, pickup_location) VALUES (:user_id, :total, NOW(), 'pending', :delivery_method, :pickup_location)");
             $stmt->execute([
                 ':user_id' => $user_id,
                 ':total' => $total_price,
@@ -79,8 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Insert delivery/shipping details if delivery method is delivery
             if ($_POST['delivery_method'] == 'delivery') {
-                $stmt = $conn->prepare("INSERT INTO shipping_details (order_id, name, email, address, city, state, zip) 
-                VALUES (:order_id, :name, :email, :address, :city, :state, :zip)");
+                $stmt = $conn->prepare("INSERT INTO shipping_details (order_id, name, email, address, city, state, zip) VALUES (:order_id, :name, :email, :address, :city, :state, :zip)");
                 $stmt->execute([
                     ':order_id' => $order_id,
                     ':name' => $_POST['name'],

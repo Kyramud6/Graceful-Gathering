@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $email = sanitize_input($_POST['email']);
             $password = $_POST['password'];
             $confirm_password = $_POST['confirm-password'];
-            $user_type = sanitize_input($_POST['user_type']); 
+            $user_type = sanitize_input($_POST['user_type']); // Add this line
 
             // Validate user type
             $allowed_types = ['user', 'vendor']; // Don't allow direct admin registration

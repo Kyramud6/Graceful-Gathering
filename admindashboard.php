@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+// Separate database connection file recommended
 function getDatabaseConnection() {
     $servername = "localhost";
     $username = "root";

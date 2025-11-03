@@ -50,7 +50,8 @@ require_once 'catalogdb.php';
                     </div>
                 </div>
 
-           <!--Most viewed section based on view count-->
+                <!-- Top Rated Products Section -->
+
 <div class="top-rated-section">
     <h2>Most Viewed Products</h2>
     <div class="top-rated-grid">
@@ -169,7 +170,7 @@ require_once 'catalogdb.php';
     background: hotpink;
 }
 
-
+/* Ensure the containing element is also properly centered */
 .tab-content {
     width: 100%;
     display: flex;
@@ -322,7 +323,7 @@ require_once 'catalogdb.php';
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-
+        /* Top Rated Section */
 .top-rated-section {
     padding: 3rem;
     margin: 3rem 0;
@@ -370,7 +371,7 @@ require_once 'catalogdb.php';
     padding: 1.5rem;
     perspective: 1000px;
 }
-
+        /* Featured Products Section */
         .featured-products {
             background-color: antiquewhite;
             border-radius: 8px;

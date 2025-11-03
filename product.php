@@ -7,12 +7,16 @@ if ($product_id <= 0) {
     header('Location: catalog.php');
     exit();
 }
+
 // Fetch product details and increment views
 $product = getProductDetailsAndIncrementViews($product_id);
 if (!$product) {
     header('Location: catalog.php');
     exit();
 }
+
+
+
 // Handle add to cart action
 if (isset($_POST['add_to_cart'])) {
     if (!isset($_SESSION['user_id'])) {
@@ -24,18 +28,22 @@ if (isset($_POST['add_to_cart'])) {
         filter_var($_POST['quantity'], FILTER_VALIDATE_INT, [
             "options" => ["min_range" => 1, "max_range" => 100]
         ]) : 1;
+
     $user_id = $_SESSION['user_id'];
+
     if ($quantity && addToCart($product_id, $user_id, $quantity)) {
         $success_message = "Product added to cart successfully!";
     } else {
         $error_message = "Failed to add product to cart. Please try again.";
     }
 }
+
+
 // Handle the booking
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['user_id'];
     $product_id = filter_var($_POST['product_id'], FILTER_VALIDATE_INT);
-    $vendor_id = filter_var($_POST['vendor_id'], FILTER_VALIDATE_INT); 
+    $vendor_id = filter_var($_POST['vendor_id'], FILTER_VALIDATE_INT); // Add vendor_id from the form
     $appointment_date = filter_var($_POST['appointment_date'], FILTER_SANITIZE_STRING);
     $phone = filter_var($_POST['phone'], FILTER_SANITIZE_NUMBER_INT);
     $notes = filter_var($_POST['notes'], FILTER_SANITIZE_STRING);

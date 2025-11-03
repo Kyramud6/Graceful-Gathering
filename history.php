@@ -9,7 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-//function to get orders
+// Modified function to get orders
 function getUserTransactionHistory($user_id)
 {
     $conn = getDBConnection();

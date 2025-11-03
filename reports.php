@@ -124,73 +124,6 @@ function getTotalSales($vendor_id, $start_date = null, $end_date = null)
     }
 }
 
-function generateTextReport($sales_report, $total_sales, $start_date = null, $end_date = null)
-{
-    $report = "Sales Report";
-    if ($start_date && $end_date) {
-        $report .= " (" . htmlspecialchars($start_date) . " to " . htmlspecialchars($end_date) . ")";
-    }
-    $report .= "\n\n";
-
-    // Product Sales Section
-    $report .= "PRODUCT SALES\n";
-    $report .= str_pad("Product Name", 30) . 
-               str_pad("Quantity Sold", 20) . 
-               str_pad("Avg Price", 15) . 
-               "Total Revenue\n";
-    $report .= str_repeat("-", 65) . "\n";
-
-    if (!empty($sales_report['product_sales'])) {
-        foreach ($sales_report['product_sales'] as $product) {
-            $report .= str_pad($product['product_name'], 30) . 
-                       str_pad($product['total_quantity_sold'], 20) . 
-                       str_pad("RM" . number_format($product['average_product_price'], 2), 15) . 
-                       "RM" . number_format($product['total_product_revenue'], 2) . "\n";
-        }
-    } else {
-        $report .= "No product sales data available.\n";
-    }
-
-    $report .= "\n";
-
-    // Appointment Sales Section
-    $report .= "APPOINTMENT SALES\n";
-    $report .= str_pad("Product Name", 30) . 
-               str_pad("Total Appointments", 20) . 
-               "Total Revenue\n";
-    $report .= str_repeat("-", 50) . "\n";
-
-    if (!empty($sales_report['appointment_sales'])) {
-        foreach ($sales_report['appointment_sales'] as $appointment) {
-            $report .= str_pad($appointment['product_name'], 30) . 
-                       str_pad($appointment['total_appointments'], 20) . 
-                       "RM" . number_format($appointment['total_appointment_revenue'], 2) . "\n";
-        }
-    } else {
-        $report .= "No appointment sales data available.\n";
-    }
-
-    $report .= "\n";
-
-    // Total Sales Summary
-    $report .= "SALES SUMMARY\n";
-    $report .= "Total Product Revenue: RM" . number_format($total_sales['total_product_revenue'], 2) . "\n";
-    $report .= "Total Appointment Revenue: RM" . number_format($total_sales['total_appointment_revenue'], 2) . "\n";
-    $report .= "Total Sales: RM" . number_format($total_sales['total_sales'], 2) . "\n";
-
-    return $report;
-}
-
-// Add this to handle text report download if requested
-if (isset($_GET['download']) && $_GET['download'] == 'text') {
-    $text_report = generateTextReport($sales_report, $total_sales, $start_date, $end_date);
-    
-    header('Content-Type: text/plain');
-    header('Content-Disposition: attachment; filename="sales_report_' . date('Y-m-d') . '.txt"');
-    echo $text_report;
-    exit;
-}
-
 // Handle date filter form submission
 $start_date = $_GET['start_date'] ?? null;
 $end_date = $_GET['end_date'] ?? null;
@@ -349,7 +282,6 @@ $total_sales = getTotalSales($vendor_id, $start_date, $end_date);
             </tr>
         </thead>
         <tbody>
-            <!--Display the sales report in the table-->
             <?php if (!empty($sales_report['product_sales'])): ?>
                 <?php foreach ($sales_report['product_sales'] as $product): ?>
                 <tr>
